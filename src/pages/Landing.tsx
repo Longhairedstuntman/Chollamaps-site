@@ -44,7 +44,7 @@ function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
       });
     } catch { el.classList.add('fallback'); return; }
     if (!CAPTURE) map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
-    if (import.meta.env.DEV) (window as unknown as { heroMap?: mapboxgl.Map }).heroMap = map; // for tuning HERO from the console
+    (window as unknown as { heroMap?: mapboxgl.Map }).heroMap = map; // for tuning HERO and diagnosing loads from the console
     let frame = 0, last = 0, touched = false, flying = false, poll = 0, idle = 0;
     const spin = (t: number) => {
       if (touched || flying) return;
