@@ -18,6 +18,8 @@ const HERO_FENCE: [[number, number], [number, number]] = [[-115.25, 43.93], [-11
 const HERO_STILL = { src: '/brand/hero-sawtooths.jpg', w: 1728, h: 962 };
 const CAPTURE = new URLSearchParams(window.location.search).has('still');
 const IDLE_MS = 15000;
+// The modifier Mapbox's cooperative gestures want for scroll-zoom: ⌘ on a Mac, Ctrl everywhere else.
+const MOD = /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? '⌘' : 'Ctrl';
 
 /** The hero is the product: Redfish Lake and Mt. Heyburn in 3D, from the first frame. The still is
     underneath; the live map's own background is transparent, so its tiles sharpen into place over the
@@ -146,15 +148,14 @@ export default function Landing() {
         <HeroMap onExplore={setExploring} />
         <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-copy">
-          <h1>Know the trail before you drive to it.</h1>
-          <p>Trails, Forest Service routes, land and conditions for the Mountain West, with the source and date behind every line. Plan on your computer. Ride from your phone.</p>
+          <h1>Your map of the Mountain West.</h1>
+          <p>Trails, Forest Service roads, land and live conditions in one 3D map. Plan on your computer. Ride from your phone.</p>
           <div className="hero-cta">
             <Link className="btn primary big" to="/map">Open the web map</Link>
             <a className="btn big ghost" href="https://apps.apple.com/" rel="noreferrer">Get the iPhone app</a>
           </div>
-          <p className="hero-note">Utah’s busiest riding and hiking areas first, then Idaho, Montana, Wyoming, Arizona and Colorado.</p>
         </div>
-        <div className="hero-caption">Redfish Lake and Mt. Heyburn, Sawtooth Range, Idaho. Drag to look around; hold ⌘ and scroll to zoom.</div>
+        <div className="hero-caption">Drag to look around. Hold {MOD} and scroll to zoom.</div>
       </section>
 
       <section className="thesis">
