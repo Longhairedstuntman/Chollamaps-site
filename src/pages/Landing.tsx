@@ -27,6 +27,8 @@ const MOD = /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? '⌘' : 'Ctrl';
     home 15 s after they stop. */
 function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
   const box = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const [captured, setCaptured] = useState(false);
   useEffect(() => {
     const el = box.current; if (!el) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -43,9 +45,11 @@ function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
       map = new mapboxgl.Map({
         container: el, style: BASES.sat.url, ...home, pitch: 0,
         maxBounds: HERO_FENCE, minZoom: 11, maxZoom: 15.5, maxPitch: 78, fadeDuration: 400,
-        cooperativeGestures: !CAPTURE, interactive: !CAPTURE, attributionControl: false, antialias: true
+        cooperativeGestures: !CAPTURE, interactive: !CAPTURE, attributionControl: false, antialias: true,
+        preserveDrawingBuffer: CAPTURE // so the still can be saved straight from the canvas
       });
     } catch { el.classList.add('fallback'); return; }
+    mapRef.current = map;
     if (!CAPTURE) map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     (window as unknown as { heroMap?: mapboxgl.Map }).heroMap = map; // for tuning HERO and diagnosing loads from the console
     let frame = 0, last = 0, touched = false, flying = false, poll = 0, idle = 0;
@@ -123,10 +127,24 @@ function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
     });
     return () => { cancelAnimationFrame(frame); clearInterval(poll); clearTimeout(idle); map.remove(); };
   }, [onExplore]);
+  // Capture mode (?still=1): once the map is in, a button saves the canvas as the hero still. The
+  // file name carries the window size so HERO_STILL can be set to match.
+  const saveStill = () => {
+    const map = mapRef.current; if (!map) return;
+    map.getCanvas().toBlob((blob) => {
+      if (!blob) return;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `hero-sawtooths-${window.innerWidth}x${window.innerHeight}.jpg`;
+      a.click(); setCaptured(true);
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    }, 'image/jpeg', 0.9);
+  };
   return <>
     {!CAPTURE && <img className="hero-fill" src={HERO_STILL.src} alt="" aria-hidden="true" />}
     {!CAPTURE && <img className="hero-still" src={HERO_STILL.src} alt="" aria-hidden="true" />}
     <div ref={box} className="hero-map" />
+    {CAPTURE && <button type="button" className="btn primary hero-save" onClick={saveStill}>{captured ? 'Saved — check Downloads' : 'Save still'}</button>}
   </>;
 }
 

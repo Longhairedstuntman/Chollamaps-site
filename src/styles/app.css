@@ -258,6 +258,8 @@ select.input { width: auto; }
 .hero.capture { min-height: 100vh; }
 .hero.capture .hero-copy, .hero.capture .hero-scrim, .hero.capture .hero-caption, .hero.capture .mapboxgl-ctrl, .hero.capture::after { display: none !important; }
 .site:has(.hero.capture) .site-nav { display: none; }
+.hero-save { position: absolute; right: 16px; bottom: 16px; z-index: 5; opacity: 0; transition: opacity .3s; }
+.hero.capture .hero-map.ready ~ .hero-save { opacity: 1; }
 .hero-map.ready { opacity: 1; }
 .hero-map.fallback { display: none; }
 .hero-map .mapboxgl-canvas { outline: none; }
