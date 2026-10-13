@@ -37,8 +37,11 @@ function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
     const home = { center: HERO.center, zoom: HERO.zoom + Math.log2(scale), pitch: HERO.pitch, bearing: HERO.bearing };
     let map: mapboxgl.Map;
     try {
+      // Start looking straight down. Tilted to 68° before the ground height is known, Mapbox would
+      // put the camera inside the ridge under the center and never load the tile that tells it so.
+      // The map is hidden until the terrain is in and the real camera has been applied anyway.
       map = new mapboxgl.Map({
-        container: el, style: BASES.sat.url, ...home,
+        container: el, style: BASES.sat.url, ...home, pitch: 0,
         maxBounds: HERO_FENCE, minZoom: 11, maxZoom: 15.5, maxPitch: 78, fadeDuration: 400,
         cooperativeGestures: !CAPTURE, interactive: !CAPTURE, attributionControl: false, antialias: true
       });
