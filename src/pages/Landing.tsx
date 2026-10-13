@@ -83,7 +83,9 @@ function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
       for (const ev of ['mousedown', 'touchstart', 'wheel'] as const) el.addEventListener(ev, touch, { passive: true });
       map.on('move', () => { if (touched && !flying) bump(); });
     }
+    let styleOk = false;
     map.on('style.load', () => {
+      styleOk = true;
       if (!map.getSource('mapbox-dem')) map.addSource('mapbox-dem', { type: 'raster-dem', url: 'mapbox://mapbox.mapbox-terrain-dem-v1', tileSize: 512, maxzoom: 14 });
       map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.3 });
       map.setFog({ range: [0.8, 9], color: '#DCE3EA', 'horizon-blend': 0.08, 'high-color': '#9FB8D1', 'space-color': '#1B2A33', 'star-intensity': 0 });
@@ -113,7 +115,12 @@ function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
         }
       }, 400);
     });
-    map.on('error', () => el.classList.add('fallback'));
+    // Only a style that fails to load is fatal (bad token, no network); a tile that 404s is not.
+    map.on('error', (e) => {
+      const msg = (e as { error?: { message?: string } }).error?.message || String(e);
+      console.warn('[hero] map error:', msg);
+      if (!styleOk) el.classList.add('fallback');
+    });
     return () => { cancelAnimationFrame(frame); clearInterval(poll); clearTimeout(idle); map.remove(); };
   }, [onExplore]);
   return <>
