@@ -90,16 +90,23 @@ function HeroMap({ onExplore }: { onExplore: (on: boolean) => void }) {
       // The camera Mapbox builds from center + zoom depends on the ground height under the center,
       // which it only knows once the terrain tile is in — so wait for that (and for the tiles to
       // settle), re-apply the home camera, and only then fade the live map in and start the slow turn.
+      // Until the ground height under the center is known, placing the camera from center + zoom
+      // puts it inside the mountain. So the still stays up — it is the right picture — until the
+      // terrain has answered and the tiles have settled; only then is the home camera locked and
+      // the live map faded in. On a slow connection, or in a tab opened in the background (tiles
+      // don't load until it is looked at), that simply takes longer. Someone who grabs the map
+      // first gets it as is.
       let ok = 0, lastElev = -1; const t0 = Date.now();
       poll = window.setInterval(() => {
         const elev = map.queryTerrainElevation(HERO.center) ?? -1;
         ok = map.areTilesLoaded() && elev > 0 && Math.abs(elev - lastElev) < 1 ? ok + 1 : 0;
         lastElev = elev;
-        if ((ok >= 4 && Date.now() - t0 > 2500) || Date.now() - t0 > 12000) {
+        if (touched) { clearInterval(poll); return; }
+        if (ok >= 4 && Date.now() - t0 > 2500) {
           clearInterval(poll);
-          if (!touched) map.jumpTo(home);
+          map.jumpTo(home);
           el.classList.add('ready');
-          if (!CAPTURE && !touched && !reduce) frame = requestAnimationFrame(spin);
+          if (!CAPTURE && !reduce) frame = requestAnimationFrame(spin);
         }
       }, 400);
     });
