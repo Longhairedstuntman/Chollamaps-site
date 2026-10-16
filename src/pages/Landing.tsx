@@ -272,7 +272,7 @@ export default function Landing() {
 
       <footer className="site-foot">
         <div><img src="/brand/cholla-logo-640w.png" alt="Cholla" height="26" /><span>Made by High Desert Outdoors in Utah.</span></div>
-        <nav><a href="https://highdesertoutdoor.co">highdesertoutdoor.co</a><a href="https://highdesertoutdoor.co/terms">Terms</a><a href="https://highdesertoutdoor.co/privacy">Privacy</a><a href="mailto:hello@chollamaps.com">Contact</a></nav>
+        <nav><a href="https://highdesertoutdoor.co">highdesertoutdoor.co</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/support">Support</a><a href="mailto:hello@chollamaps.com">Contact</a></nav>
       </footer>
     </div>
   );
