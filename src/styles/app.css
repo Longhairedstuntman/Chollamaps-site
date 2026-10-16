@@ -122,6 +122,9 @@ select.input { width: auto; }
 .btn.primary { background: var(--forest); color: #fff; border-color: var(--forest); }
 .btn.primary:hover { background: var(--ink); }
 .btn.danger { color: var(--alert); }
+.delete-box { margin-top: 8px; padding: 12px 14px; border: 1px solid var(--alert); border-radius: 12px; }
+.delete-box .input { width: 100%; margin: 8px 0; }
+.delete-box .row { display: flex; gap: 8px; }
 .btn:disabled { opacity: .45; cursor: default; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
 .chip { display: inline-flex; align-items: center; gap: 5px; font: 500 12px/1 var(--body); padding: 7px 10px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--forest); cursor: pointer; }
