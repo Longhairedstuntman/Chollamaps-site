@@ -9,6 +9,9 @@ import Panel from './Panel';
 export default function AccountPanel({ onClose }: { onClose: () => void }) {
   const session = useApp((s) => s.session), profile = useApp((s) => s.profile), pro = useApp((s) => s.pro), setProfile = useApp((s) => s.setProfile), toast = useApp((s) => s.showToast);
   const [name, setName] = useState(profile?.display_name || '');
+  const [del, setDel] = useState(false);
+  const [typed, setTyped] = useState('');
+  const [busy, setBusy] = useState(false);
   if (!session) return null;
   const units = profile?.units || 'imperial';
   const saveUnits = async (u: 'imperial' | 'metric') => {
@@ -20,6 +23,13 @@ export default function AccountPanel({ onClose }: { onClose: () => void }) {
     const { error } = await sb.from('profiles').update({ display_name: name.slice(0, 60) }).eq('id', session.user.id);
     if (error) return toast(error.message);
     setProfile(profile ? { ...profile, display_name: name } : null, pro); toast('Saved.');
+  };
+  const deleteAccount = async () => {
+    setBusy(true);
+    const { error } = await sb.rpc('delete_my_account');
+    if (error) { setBusy(false); return toast(error.message); }
+    toast('Your account has been deleted.');
+    await signOut();
   };
   return (
     <Panel title={profile?.display_name || 'Your account'} eyebrow={pro ? 'Cholla Pro' : 'Cholla Free'} onClose={onClose}>
@@ -39,7 +49,21 @@ export default function AccountPanel({ onClose }: { onClose: () => void }) {
       <p className="fine">Prints the map as it sits on screen, with the scale bar. Resize the window to frame it first.</p>
       <div className="eyebrow">Account</div>
       <button type="button" className="btn" onClick={() => void signOut()}>Sign out</button>
-      <p className="fine">To delete your account, use <b>Saved → Account → Delete account</b> in the app.</p>
+
+      {!del ? (
+        <button type="button" className="btn danger" onClick={() => { setTyped(''); setDel(true); }}>Delete account…</button>
+      ) : (
+        <div className="delete-box">
+          <p><b>Delete your Cholla account?</b></p>
+          <p className="fine">This permanently removes your account and everything backed up to it — rides, pins, routes, reports, posts and crew history. It can’t be undone. If you subscribe to Pro through the iPhone app, cancel it in the App Store first so you aren’t charged again.</p>
+          <input className="input" value={typed} onChange={(e) => setTyped(e.target.value.toUpperCase())} placeholder="Type DELETE to confirm" aria-label="Type DELETE to confirm" />
+          <div className="row">
+            <button type="button" className="btn" onClick={() => setDel(false)} disabled={busy}>Cancel</button>
+            <button type="button" className="btn danger" onClick={() => void deleteAccount()} disabled={typed !== 'DELETE' || busy}>{busy ? 'Deleting…' : 'Delete my account'}</button>
+          </div>
+        </div>
+      )}
+      <p className="fine"><a href="https://highdesertoutdoor.co/terms">Terms</a> · <a href="https://highdesertoutdoor.co/privacy">Privacy</a> · <a href="https://highdesertoutdoor.co/support">Support</a></p>
     </Panel>
   );
 }
